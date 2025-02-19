@@ -248,8 +248,3 @@ Enable HTTP, HTTPS, and SSH and so on:
 
 ## Conclusion
 Congratulations! You have successfully configured and secured your web servers with Apache2, Nginx, ModSecurity, and OWASP CRS. This guide showcases your journey of creating a robust web environment, thoroughly tested against common vulnerabilities. Consider sharing this experience as a blog post on platforms like **daily.dev**, **dev.to**, or as a comprehensive `README.md` on my GitHub.
-
-
-# Traefik-Docker-implementation
-# Traefik-Docker-implementation
-# Traefik-Docker-implementation

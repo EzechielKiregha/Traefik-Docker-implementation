@@ -1,0 +1,138 @@
+services:
+  traefik:
+    image: traefik:latest
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - portfolio-network
+
+  frontend__24673_ui:
+    build:
+      context: ./frontend-elearning
+      dockerfile: Dockerfile
+    volumes:
+      - static_volume:/usr/share/nginx/html/static
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend__24673_ui.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend__24673_ui.loadbalancer.server.port=80"
+    networks:
+      - portfolio-network
+    depends_on:
+      - backend_24673_1
+      - backend_24673_2
+
+  backend_24673_1:
+    build: ./backend-1
+    command: /opt/venv1/bin/gunicorn -b 0.0.0.0:8000 --worker-class=gevent --worker-connections=1000 --workers=3 elearning.wsgi
+    volumes:
+      - static_volume:/app/static
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend_24673_1.rule=PathPrefix(`/api`)"
+      - "traefik.http.services.backen_24673_1.loadbalancer.server.port=8000"
+      - "traefik.http.middlewares.backend_24673_1-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend_24673_1.middlewares=backend_24673_1-stripprefix"
+    networks:
+      - portfolio-network
+
+  backend_24673_2:
+    build: ./backend-1
+    command: /opt/venv1/bin/gunicorn -b 0.0.0.0:8001 --worker-class=gevent --worker-connections=1000 --workers=3 elearning.wsgi
+    volumes:
+      - static_volume:/app/static
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend_24673_2.rule=PathPrefix(`/api`)"
+      - "traefik.http.services.backend_24673_2.loadbalancer.server.port=8001"
+      - "traefik.http.middlewares.backend_24673_2-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend_24673_2.middlewares=backend_24673_2-stripprefix"
+    networks:
+      - portfolio-network
+volumes:
+  static_volume:
+
+networks:
+  portfolio-network:
+    driver: bridge
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# version: '3.8'
+
+# services:
+#   traefik:
+#     image: traefik:v2.10
+#     command:
+#       - --api.insecure=true
+#       - --providers.docker=true
+#       - --entrypoints.web.address=:80
+#       - --log.level=DEBUG
+#     ports:
+#       - "80:80"
+#       - "8080:8080"
+#     volumes:
+#       - /var/run/docker.sock:/var/run/docker.sock
+#     networks:
+#       - web_network
+
+#   backend_1:
+#     build: 
+#       context: ./backend-1
+#     container_name: backend_24673_1
+#     # command: /opt/venv1/bin/gunicorn -b 0.0.0.0:8000 --worker-class=gevent --worker-connections=1000 --workers=3 elearning.wsgi
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.backend_24673_1.rule=Host(`backend.localhost`) && PathPrefix(`/`)"
+#       - "traefik.http.services.backen_24673_1.loadbalancer.server.port=8000"
+#     networks:
+#       - web_network
+
+#   backend_2:
+#     build: 
+#       context: ./backend-2
+#     container_name: backend_24673_2
+#     # command: /opt/venv/bin/gunicorn -b 0.0.0.0:8000 --worker-class=gevent --worker-connections=1000 --workers=3 elearning.wsgi
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.backend_24673_2.rule=Host(`backend.localhost`) && PathPrefix(`/api/v2`)"
+#       - "traefik.http.services.backend_24673_2.loadbalancer.server.port=8000"
+#     networks:
+#       - web_network
+
+#   frontend__24673_ui:
+#     build: 
+#       context: ./frontend__24673_ui-elearning
+#     container_name: frontend__24673_ui_24673
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.frontend__24673_ui.rule=Host(`localhost`)"
+#       - "traefik.http.services.frontend__24673_ui.loadbalancer.server.port=80"
+#     networks:
+#       - web_network
+
+# networks:
+#   web_network:
+#     driver: bridge
